@@ -1,13 +1,24 @@
-# Neon CRM Member Extractor
+# Neon CRM Data Extractor
 
-A Google Apps Script that extracts active member data from Neon CRM and populates a Google Sheet.
+A Google Apps Script that extracts all available data from Neon CRM and populates a Google Sheet with separate tabs for each data type.
 
 ## Features
 
-- Fetches all active members from Neon CRM
-- Automatic pagination for large member lists
-- Extracts key member fields: ID, name, email, phone, address, membership details
+- Fetches all data from multiple Neon CRM endpoints
+- Automatic pagination for large datasets
+- Dynamically retrieves all available fields from the API
+- Separate tabs for each data type
 - One-click refresh via custom Google Sheets menu
+- Node.js scripts for testing API authentication
+
+## Scripts
+
+| Script | Description |
+|--------|-------------|
+| `scripts/test-script.js` | Google Apps Script for Neon CRM v2 API |
+| `scripts/test-script-v1.js` | Google Apps Script for Neon CRM legacy API |
+| `scripts/auth-test.js` | Node.js script to test v2 API authentication |
+| `scripts/auth-test-v1.js` | Node.js script to test legacy API authentication |
 
 ## Setup
 
@@ -18,55 +29,90 @@ A Google Apps Script that extracts active member data from Neon CRM and populate
 3. Create a new API key or use an existing one
 4. Note your **Organization ID** and **API Key**
 
-### 2. Create a Google Sheet
+### 2. Configure Local Credentials
 
-1. Create a new Google Sheet (or open an existing one)
+Create a `.env` file in the project root:
+
+```
+NEON_ORG_ID=your-org-id
+NEON_API_KEY=your-api-key
+```
+
+### 3. Test API Authentication
+
+```bash
+# Test v2 API (https://api.neoncrm.com/v2)
+node scripts/auth-test.js
+
+# Test legacy API (https://api.neoncrm.com)
+node scripts/auth-test-v1.js
+```
+
+### 4. Create Required Tabs in Google Sheets
+
+Create the following tabs in your Google Sheet:
+
+- `Memberships`
+
+### 5. Add the Script to Google Sheets
+
+1. Open your Google Sheet
 2. Go to **Extensions > Apps Script**
 3. Delete any existing code in the editor
 4. Copy the contents of `scripts/test-script.js` into the editor
 
-### 3. Configure Credentials
+### 6. Configure Credentials in Apps Script
 
-In the Apps Script editor, update the configuration at the top of the script:
+Update the configuration at the top of the script:
 
 ```javascript
 const NEON_ORG_ID = 'your-org-id';      // Your Neon Organization ID
 const NEON_API_KEY = 'your-api-key';    // Your Neon API Key
 ```
 
-### 4. Save and Authorize
+### 7. Save and Authorize
 
 1. Click **Save** (or Ctrl/Cmd + S)
 2. Refresh your Google Sheet
 3. You'll see a new **Neon CRM** menu appear
-4. Click **Neon CRM > Refresh Members**
+4. Click **Neon CRM > Refresh All Data**
 5. Authorize the script when prompted
 
 ## Usage
 
-After setup, click **Neon CRM > Refresh Members** to pull the latest active member data into your sheet.
+### Menu Options
 
-### Data Fields
+| Menu Item | Description |
+|-----------|-------------|
+| Refresh All Data | Fetches all data and updates all tabs |
+| Refresh Memberships | Updates only the Memberships tab |
 
-The script extracts the following fields for each active member:
+### Data Tabs
 
-| Column | Field |
-|--------|-------|
-| Account ID | Neon account identifier |
-| First Name | Member's first name |
-| Last Name | Member's last name |
-| Email | Primary email address |
-| Phone | Primary phone number |
-| Address | Street address |
-| City | City |
-| State | State/Province |
-| Zip | Postal code |
-| Membership | Membership type name |
-| Expiration | Membership expiration date |
+| Tab | Data |
+|-----|------|
+| Memberships | Accounts with membership data (uses account search with membership fields) |
+| Refresh Info | Auto-generated tab showing last refresh timestamps and record counts |
+
+## API Versions
+
+This project supports two Neon CRM API versions:
+
+| API | Base URL | Auth Method |
+|-----|----------|-------------|
+| v2 (recommended) | `https://api.neoncrm.com/v2` | Basic Auth header |
+| Legacy | `https://api.neoncrm.com/neonws/services/api` | Session-based login |
+
+## Notes
+
+- The script uses existing tabs only - it will not create new tabs
+- If a tab is missing, that endpoint will show "Sheet not found" in results
+- All available fields are fetched dynamically from the API
+- Nested objects are serialized as JSON strings
 
 ## API Reference
 
-This script uses the [Neon CRM v2 API](https://developer.neoncrm.com/api-v2/).
+- [Neon CRM API v2 Docs](https://developer.neoncrm.com/api-v2/)
 
 ## License
 

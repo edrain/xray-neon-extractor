@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:api.neoncrm.com)",
+      "WebFetch(domain:developer.neoncrm.com)",
+      "WebSearch",
+      "WebFetch(domain:documenter.getpostman.com)",
+      "Bash(git -C /Users/elidrain/Documents/Projects/Personal/xray-neon-extractor log --oneline -10)",
+      "Bash(git -C /Users/elidrain/Documents/Projects/Personal/xray-neon-extractor branch --show-current)",
+      "Bash(chmod:*)",
+      "Bash(node /Users/elidrain/Documents/Projects/Personal/xray-neon-extractor/scripts/auth-test.js:*)",
+      "Bash(node --version)",
+      "Bash(node /Users/elidrain/Documents/Projects/Personal/xray-neon-extractor/scripts/auth-test-v1.js:*)",
+      "Bash(curl:*)",
+      "Bash(tr:*)",
+      "Bash(node scripts/auth-test.js:*)"
+    ]
+  }
+}
