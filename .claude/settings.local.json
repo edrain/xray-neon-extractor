@@ -13,7 +13,10 @@
       "Bash(node /Users/elidrain/Documents/Projects/Personal/xray-neon-extractor/scripts/auth-test-v1.js:*)",
       "Bash(curl:*)",
       "Bash(tr:*)",
-      "Bash(node scripts/auth-test.js:*)"
+      "Bash(node scripts/auth-test.js:*)",
+      "Bash(git checkout:*)",
+      "Bash(git merge:*)",
+      "Bash(git stash:*)"
     ]
   }
 }
