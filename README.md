@@ -16,9 +16,7 @@ A Google Apps Script that extracts all available data from Neon CRM and populate
 | Script | Description |
 |--------|-------------|
 | `scripts/test-script.js` | Google Apps Script for Neon CRM v2 API |
-| `scripts/test-script-v1.js` | Google Apps Script for Neon CRM legacy API |
 | `scripts/auth-test.js` | Node.js script to test v2 API authentication |
-| `scripts/auth-test-v1.js` | Node.js script to test legacy API authentication |
 
 ## Setup
 
@@ -41,11 +39,7 @@ NEON_API_KEY=your-api-key
 ### 3. Test API Authentication
 
 ```bash
-# Test v2 API (https://api.neoncrm.com/v2)
 node scripts/auth-test.js
-
-# Test legacy API (https://api.neoncrm.com)
-node scripts/auth-test-v1.js
 ```
 
 ### 4. Create Required Tabs in Google Sheets
@@ -93,15 +87,6 @@ const NEON_API_KEY = 'your-api-key';    // Your Neon API Key
 |-----|------|
 | Memberships | Accounts with membership data (uses account search with membership fields) |
 | Refresh Info | Auto-generated tab showing last refresh timestamps and record counts |
-
-## API Versions
-
-This project supports two Neon CRM API versions:
-
-| API | Base URL | Auth Method |
-|-----|----------|-------------|
-| v2 (recommended) | `https://api.neoncrm.com/v2` | Basic Auth header |
-| Legacy | `https://api.neoncrm.com/neonws/services/api` | Session-based login |
 
 ## Notes
 
