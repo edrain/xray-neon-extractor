@@ -16,7 +16,13 @@ A Google Apps Script that extracts all available data from Neon CRM and populate
 | Script | Description |
 |--------|-------------|
 | `scripts/test-script.js` | Google Apps Script for Neon CRM v2 API |
+<<<<<<< HEAD
 | `scripts/auth-test.js` | Node.js script to test v2 API authentication |
+=======
+| `scripts/test-script-v1.js` | Google Apps Script for Neon CRM legacy API |
+| `scripts/auth-test.js` | Node.js script to test v2 API authentication |
+| `scripts/auth-test-v1.js` | Node.js script to test legacy API authentication |
+>>>>>>> 936ab748fec4b36110f6b10fbef3dc88e25945f7
 
 ## Setup
 
@@ -35,6 +41,7 @@ Create a `.env` file in the project root:
 NEON_ORG_ID=your-org-id
 NEON_API_KEY=your-api-key
 ```
+<<<<<<< HEAD
 
 ### 3. Test API Authentication
 
@@ -42,6 +49,19 @@ NEON_API_KEY=your-api-key
 node scripts/auth-test.js
 ```
 
+=======
+
+### 3. Test API Authentication
+
+```bash
+# Test v2 API (https://api.neoncrm.com/v2)
+node scripts/auth-test.js
+
+# Test legacy API (https://api.neoncrm.com)
+node scripts/auth-test-v1.js
+```
+
+>>>>>>> 936ab748fec4b36110f6b10fbef3dc88e25945f7
 ### 4. Create Required Tabs in Google Sheets
 
 Create the following tabs in your Google Sheet:
@@ -82,11 +102,28 @@ const NEON_API_KEY = 'your-api-key';    // Your Neon API Key
 | Refresh Memberships | Updates only the Memberships tab |
 
 ### Data Tabs
+<<<<<<< HEAD
 
 | Tab | Data |
 |-----|------|
 | Memberships | Accounts with membership data (uses account search with membership fields) |
 | Refresh Info | Auto-generated tab showing last refresh timestamps and record counts |
+=======
+
+| Tab | Data |
+|-----|------|
+| Memberships | Accounts with membership data (uses account search with membership fields) |
+| Refresh Info | Auto-generated tab showing last refresh timestamps and record counts |
+
+## API Versions
+
+This project supports two Neon CRM API versions:
+
+| API | Base URL | Auth Method |
+|-----|----------|-------------|
+| v2 (recommended) | `https://api.neoncrm.com/v2` | Basic Auth header |
+| Legacy | `https://api.neoncrm.com/neonws/services/api` | Session-based login |
+>>>>>>> 936ab748fec4b36110f6b10fbef3dc88e25945f7
 
 ## Notes
 
