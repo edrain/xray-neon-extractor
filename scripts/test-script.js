@@ -7,87 +7,57 @@ const BASE_URL = 'https://api.neoncrm.com/v2';
 function onOpen() {
   SpreadsheetApp.getUi()
     .createMenu('Neon CRM')
-    .addItem('Refresh All Data', 'fetchAllData')
-    .addSeparator()
     .addItem('Refresh Memberships', 'fetchMemberships')
+    .addItem('Refresh 365+ Donors', 'fetch365Donors')
     .addToUi();
 }
 
-// ============ FETCH ALL DATA ============
-function fetchAllData() {
-  const ui = SpreadsheetApp.getUi();
-  ui.alert('Starting data refresh...', 'This may take a few minutes.', ui.ButtonSet.OK);
-
-  const refreshInfo = [];
-  const results = [];
-
-  // Track each refresh with timestamp
-  const dataSources = [
-    { name: 'Memberships', fetchFn: fetchMemberships }
-  ];
-
-  for (const source of dataSources) {
-    const result = source.fetchFn();
-    const endTime = new Date();
-
-    // Parse the record count from the result string
-    const countMatch = result.match(/^(\d+)/);
-    const recordCount = countMatch ? parseInt(countMatch[1], 10) : 0;
-
-    refreshInfo.push({
-      dataType: source.name,
-      recordCount: recordCount,
-      status: result,
-      refreshedAt: endTime
-    });
-
-    results.push(source.name + ': ' + result);
-  }
-
-  // Update the Refresh Info tab
-  updateRefreshInfo(refreshInfo);
-
-  ui.alert('Data Refresh Complete', results.join('\n'), ui.ButtonSet.OK);
-}
-
-// ============ UPDATE REFRESH INFO TAB ============
-function updateRefreshInfo(refreshData) {
+// ============ UPDATE SINGLE REFRESH ENTRY ============
+function updateSingleRefreshInfo(dataType, result) {
   const sheetName = 'Refresh Info';
   let sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
 
   // Create the sheet if it doesn't exist
   if (!sheet) {
     sheet = SpreadsheetApp.getActiveSpreadsheet().insertSheet(sheetName);
+    const headers = ['Data Type', 'Record Count', 'Status', 'Refreshed At'];
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+    sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold');
   }
 
-  // Clear the sheet
-  sheet.clear();
+  // Parse the record count from the result string
+  const countMatch = result.match(/^(\d+)/);
+  const recordCount = countMatch ? parseInt(countMatch[1], 10) : 0;
+  const refreshedAt = new Date();
 
-  // Set headers
-  const headers = ['Data Type', 'Record Count', 'Status', 'Refreshed At'];
-  sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
-  sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold');
+  // Find existing row for this data type or add new row
+  const dataRange = sheet.getDataRange();
+  const values = dataRange.getValues();
+  let rowIndex = -1;
 
-  // Add refresh data rows
-  if (refreshData.length > 0) {
-    const rows = refreshData.map(info => [
-      info.dataType,
-      info.recordCount,
-      info.status,
-      Utilities.formatDate(info.refreshedAt, Session.getScriptTimeZone(), 'yyyy-MM-dd HH:mm:ss')
-    ]);
-    sheet.getRange(2, 1, rows.length, headers.length).setValues(rows);
+  for (let i = 1; i < values.length; i++) {
+    if (values[i][0] === dataType) {
+      rowIndex = i + 1;
+      break;
+    }
   }
 
-  // Add summary row
-  const totalRecords = refreshData.reduce((sum, info) => sum + info.recordCount, 0);
-  const summaryRow = refreshData.length + 3;
-  sheet.getRange(summaryRow, 1).setValue('Total Records:');
-  sheet.getRange(summaryRow, 2).setValue(totalRecords);
-  sheet.getRange(summaryRow, 1, 1, 2).setFontWeight('bold');
+  // If not found, add new row
+  if (rowIndex === -1) {
+    rowIndex = values.length + 1;
+  }
+
+  // Update the row
+  const row = [
+    dataType,
+    recordCount,
+    result,
+    Utilities.formatDate(refreshedAt, Session.getScriptTimeZone(), 'yyyy-MM-dd HH:mm:ss')
+  ];
+  sheet.getRange(rowIndex, 1, 1, 4).setValues([row]);
 
   // Auto-resize columns
-  sheet.autoResizeColumns(1, headers.length);
+  sheet.autoResizeColumns(1, 4);
 }
 
 // ============ FETCH MEMBERSHIPS ============
@@ -160,7 +130,83 @@ function fetchMemberships() {
     sheet.getRange(1, 1).setValue('No accounts with membership data found');
   }
 
-  return filteredResults.length + ' records';
+  const result = filteredResults.length + ' records';
+  updateSingleRefreshInfo('Memberships', result);
+  return result;
+}
+
+// ============ FETCH 365+ DONORS ============
+function fetch365Donors() {
+  const sheetName = '365+ Donors';
+  const sheet = getSheet(sheetName);
+  if (!sheet) return 'Sheet not found';
+
+  // Get all available output fields
+  const allFields = getSearchFields('/accounts/search/outputFields');
+
+  // Filter for contact info fields
+  const contactFields = ['Account ID', 'First Name', 'Last Name', 'Email 1', 'Email 2', 'Email 3',
+                         'Preferred Phone', 'Phone 1', 'Phone 2', 'Phone 3',
+                         'Address Line 1', 'Address Line 2', 'City', 'State/Province', 'Zip Code', 'Country'].filter(f => allFields.includes(f));
+
+  // Filter for donor notes fields
+  const noteFields = allFields.filter(f => {
+    const lower = f.toLowerCase();
+    return lower.includes('note') || lower.includes('comment');
+  });
+
+  // Filter for 2025 donation aggregate fields
+  const donationFields = allFields.filter(f => {
+    const lower = f.toLowerCase();
+    return lower.includes('2025') &&
+           (lower.includes('donation') || lower.includes('gift')) &&
+           (lower.includes('total') || lower.includes('amount') || lower.includes('sum'));
+  });
+
+  if (donationFields.length === 0) {
+    sheet.clear();
+    sheet.getRange(1, 1).setValue('No donation aggregate fields found for 2025 in API');
+    return '0 records - no donation fields';
+  }
+
+  // Combine all desired output fields
+  let outputFields = [...contactFields, ...noteFields, ...donationFields];
+
+  // Remove duplicates
+  outputFields = [...new Set(outputFields)];
+
+  const searchPayload = {
+    searchFields: [
+      { field: 'Account ID', operator: 'NOT_BLANK' }
+    ],
+    outputFields: outputFields.slice(0, 50),
+    pagination: { currentPage: 0, pageSize: 200 }
+  };
+
+  const allResults = paginatedSearch('/accounts/search', searchPayload);
+
+  // Filter to accounts with >= $365 in donations in 2025
+  const filteredResults = allResults.filter(record => {
+    for (const field of donationFields) {
+      const value = parseFloat(record[field]);
+      if (!isNaN(value) && value >= 365) {
+        return true;
+      }
+    }
+    return false;
+  });
+
+  if (filteredResults.length > 0) {
+    // Use writeToSheet with explicit field order to ensure contact info appears first
+    writeToSheet(sheet, filteredResults, outputFields);
+  } else {
+    sheet.clear();
+    sheet.getRange(1, 1).setValue('No donors with >= $365 in 2025 found');
+  }
+
+  const result = filteredResults.length + ' records';
+  updateSingleRefreshInfo('365+ Donors', result);
+  return result;
 }
 
 // ============ HELPER: Get Existing Sheet ============
