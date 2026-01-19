@@ -47,6 +47,7 @@ node scripts/auth-test.js
 Create the following tabs in your Google Sheet:
 
 - `Memberships`
+- `365+ Donors`
 
 ### 5. Add the Script to Google Sheets
 
@@ -69,7 +70,7 @@ const NEON_API_KEY = 'your-api-key';    // Your Neon API Key
 1. Click **Save** (or Ctrl/Cmd + S)
 2. Refresh your Google Sheet
 3. You'll see a new **Neon CRM** menu appear
-4. Click **Neon CRM > Refresh All Data**
+4. Click any menu item (e.g., **Neon CRM > Refresh Memberships**)
 5. Authorize the script when prompted
 
 ## Usage
@@ -78,22 +79,25 @@ const NEON_API_KEY = 'your-api-key';    // Your Neon API Key
 
 | Menu Item | Description |
 |-----------|-------------|
-| Refresh All Data | Fetches all data and updates all tabs |
-| Refresh Memberships | Updates only the Memberships tab |
+| Refresh Memberships | Updates the Memberships tab with all accounts that have membership data |
+| Refresh 365+ Donors | Updates the 365+ Donors tab with accounts that donated >= $365 in 2025 |
 
 ### Data Tabs
 
 | Tab | Data |
 |-----|------|
 | Memberships | Accounts with membership data (uses account search with membership fields) |
-| Refresh Info | Auto-generated tab showing last refresh timestamps and record counts |
+| 365+ Donors | Accounts with >= $365 total donations in 2025, includes contact info and donor notes |
+| Refresh Info | Auto-generated tab showing last refresh timestamps and record counts for each tab |
 
 ## Notes
 
 - The script uses existing tabs only - it will not create new tabs
+- Each tab must be refreshed individually via the menu (no batch refresh)
 - If a tab is missing, that endpoint will show "Sheet not found" in results
 - All available fields are fetched dynamically from the API
 - Nested objects are serialized as JSON strings
+- The Refresh Info tab is auto-generated and updates automatically when any tab is refreshed
 
 ## API Reference
 

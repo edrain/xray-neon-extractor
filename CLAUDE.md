@@ -37,6 +37,8 @@ The script fetches from these Neon CRM endpoints:
 | Tab Name | Endpoint | Method | Notes |
 |----------|----------|--------|-------|
 | Memberships | `/accounts/search` | POST (search) | Uses account search with membership output fields |
+| 365+ Donors | `/accounts/search` | POST (search) | Accounts with >= $365 total donations in 2025, includes contact info and notes |
+| Refresh Info | N/A | Auto-generated | Shows refresh timestamps and record counts for each tab |
 
 ## Development Workflow
 
@@ -52,9 +54,10 @@ node scripts/auth-test.js
 
 ## Common Tasks
 
-- **Add new endpoint**: Create fetch function, add to menu in `onOpen()`, add to `fetchAllData()`
+- **Add new endpoint**: Create fetch function with `updateSingleRefreshInfo()` call, add to menu in `onOpen()`
 - **Change search criteria**: Modify `searchFields` array in the relevant fetch function
 - **Test API**: Use `node scripts/auth-test.js` or curl with credentials from `.env`
+- **Each tab refreshes individually**: No batch refresh functionality, each tab must be refreshed separately via menu
 
 ## API Reference
 
