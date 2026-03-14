@@ -16,9 +16,14 @@ A Google Apps Script that extracts all available data from Neon CRM and populate
 ## Project Structure
 
 ```
-scripts/
-  test-script.js      # Google Apps Script (copy to Apps Script editor)
-  auth-test.js        # Node.js script to test API authentication
+apps-scripts/
+  test-script.js      # Google Apps Script (copy to Apps Script editor) — source of truth
+preview-scripts/
+  runner.js           # Generic runner: loads any Apps Script, runs it, exports CSVs
+preview/              # CSV exports from runner.js (gitignored)
+.claude/skills/
+  preview.md          # /preview skill — runs runner.js and shows output summary
+endpoints.md          # Neon CRM API v2 endpoint reference
 .env                  # Local credentials (not committed)
 .env.example          # Credential template
 ```
@@ -42,24 +47,28 @@ The script fetches from these Neon CRM endpoints:
 
 ## Development Workflow
 
-1. Edit scripts locally
-2. For Google Sheets: Copy contents to Apps Script editor (Extensions > Apps Script)
-3. For auth testing: Run Node.js scripts from terminal
+1. Edit `apps-scripts/test-script.js` (the Apps Script — source of truth)
+2. Preview locally with `/preview` or `node preview-scripts/runner.js test-script.js`
+3. For Google Sheets: Copy contents to Apps Script editor (Extensions > Apps Script)
+4. For auth testing: Run Node.js scripts from terminal
 
-## Testing Authentication
+## Local Preview (`/preview` skill)
+
+Run any Apps Script file locally without touching Google Sheets:
 
 ```bash
-node scripts/auth-test.js
+node preview-scripts/runner.js test-script.js
 ```
+
+- Discovers functions from `onOpen()` automatically
+- Injects Node.js shims for `UrlFetchApp`, `SpreadsheetApp`, `Utilities`, `Logger`, `Session`
+- Exports each sheet tab as `preview/<tab-slug>.csv`
+- To add a new Apps Script: create the file in `apps-scripts/`, it will be picked up automatically
 
 ## Common Tasks
 
 - **Add new endpoint**: Create fetch function with `updateSingleRefreshInfo()` call, add to menu in `onOpen()`
 - **Change search criteria**: Modify `searchFields` array in the relevant fetch function
-- **Test API**: Use `node scripts/auth-test.js` or curl with credentials from `.env`
+- **Preview data locally**: Use `/preview` or `node preview-scripts/runner.js test-script.js`
+- **Test API**: Use curl with credentials from `.env`
 - **Each tab refreshes individually**: No batch refresh functionality, each tab must be refreshed separately via menu
-
-## API Reference
-
-- [Neon CRM API v2 Docs](https://developer.neoncrm.com/api-v2/)
-- [Google Apps Script Reference](https://developers.google.com/apps-script/reference)
