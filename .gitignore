@@ -1,3 +1,4 @@
 .env
 .gitignore
-.claude
+.claude/settings.local.json
+preview/*
