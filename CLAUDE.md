@@ -23,7 +23,7 @@ preview-scripts/
 preview/              # CSV exports from runner.js (gitignored)
 .claude/skills/
   preview.md          # /preview skill — runs runner.js and shows output summary
-endpoints.md          # Neon CRM API v2 endpoint reference
+neon-data-model.md    # XRAY's Neon CRM data model — campaigns, funds, membership levels, API structure, field names, scale
 .env                  # Local credentials (not committed)
 .env.example          # Credential template
 ```
@@ -31,7 +31,7 @@ endpoints.md          # Neon CRM API v2 endpoint reference
 ## Key Concepts
 
 - **Google Apps Script**: Runs in Google's environment, not Node.js. Uses `UrlFetchApp` for HTTP requests, `SpreadsheetApp` for sheet manipulation.
-- **Neon CRM v2 API**: RESTful API with Basic Auth and pagination. Search endpoints return paginated results.
+- **Neon CRM v2 API**: RESTful API with Basic Auth and pagination. Search endpoints return paginated results. See `neon-data-model.md` for XRAY's campaigns, funds, membership levels, available fields, search operators, and API scale.
 - **onOpen()**: Special function that runs when the spreadsheet opens, creates custom menu.
 - **Existing tabs only**: Script uses pre-existing tabs, does not create new ones.
 
